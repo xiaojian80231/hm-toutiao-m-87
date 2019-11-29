@@ -9,6 +9,9 @@ import 'amfe-flexible'
 // 使用vant组件库
 import Vant from 'vant'
 import 'vant/lib/index.css'
+
+import '@/styles/index.less'
+
 Vue.use(Vant)
 
 Vue.config.productionTip = false
