@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import store from '@/store'
 
 const Layout = () => import('@/views/Layout')
 const Home = () => import('@/views/home/Index')
@@ -39,4 +40,14 @@ const router = new VueRouter({
   routes
 })
 
+// 导航守卫   前置守卫
+// 当访问的是：个人中心、编辑资料、小志同学时，判断登录状态
+// 如果没有登录--->跳转登录页面（回跳）
+router.beforeEach((to, from, next) => {
+  // user用户信息中有token
+  const { user } = store.state
+  const loginConfig = { path: '/login', query: { redirectUrl: to.path } }
+  if (to.path.startsWith('/user') && !user.token) return next(loginConfig)
+  next()
+})
 export default router

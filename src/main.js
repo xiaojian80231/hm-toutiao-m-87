@@ -8,7 +8,7 @@ import 'amfe-flexible'
 
 // 使用vant组件库
 import Vant from 'vant'
-import 'vant/lib/index.css'
+import 'vant/lib/index.less'
 
 import '@/styles/index.less'
 
