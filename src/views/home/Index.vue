@@ -39,7 +39,11 @@
                     <span>{{item.aut_name}}</span>
                     <span>{{item.comm_count}}评论</span>
                     <span>{{item.pubdate|relTime}}</span>
-                    <span @click="openMoreAction" v-if="user.token" class="close">
+                    <span
+                      @click="openMoreAction(item.art_id.toString())"
+                      v-if="user.token"
+                      class="close"
+                    >
                       <van-icon name="ellipsis" />
                     </span>
                   </div>
@@ -50,12 +54,27 @@
         </div>
       </van-tab>
     </van-tabs>
-    <span class="bar_btn" slot="nav-right">
+    <span @click="openChannelEdit" class="bar_btn" slot="nav-right">
       <van-icon name="wap-nav"></van-icon>
     </span>
     <!-- 使用更多操作组件 -->
-     <!--v-model语法糖原理  :value="showMoreAction" @input="showMoreAction=$event" -->
-    <more-action v-if="user.token" v-model="showMoreAction"></more-action>
+    <!--v-model语法糖原理  :value="showMoreAction" @input="showMoreAction=$event" -->
+    <more-action
+      v-if="user.token"
+      v-model="showMoreAction"
+      :articleId="articleId"
+      @on-disLikes="removeArticle()"
+      @on-report="removeArticle()"
+    ></more-action>
+
+    <!-- 使用频道编辑组件 -->
+      <!-- :activeIndex="activeIndex" @update="activeIndex=$event" 数据同步（双向绑定）-->
+      <!-- :activeIndex.sync="activeIndex" 但是子组件触发 $emit('update:activeIndex','数据')-->
+    <channel-edit
+      v-model="showChannelEdit"
+      :myChannels="myChannels"
+      :activeIndex.sync="activeIndex"
+    ></channel-edit>
   </div>
 </template>
 
@@ -69,22 +88,26 @@ import { getMyChannels } from '@/api/channel'
 import { getArticles } from '@/api/article'
 import { mapState } from 'vuex'
 import MoreAction from './components/more-action'
+import ChannelEdit from './components/channel-edit'
 
 export default {
   name: 'home-index',
   components: {
-    MoreAction
+    MoreAction,
+    ChannelEdit
   },
   data () {
     return {
-      upLoading: false, // 上拉加载中
-      finished: false, // 是否全部加载完成
-      articles: [], // 文章列表
-      downLoading: false, // 是否是刷新状态
+      // upLoading: false, // 上拉加载中
+      // finished: false, // 是否全部加载完成
+      // articles: [], // 文章列表
+      // downLoading: false, // 是否是刷新状态
       refreshSuccessText: '', // 刷新完成的提示   文案（暂无更新|更新成功）
       myChannels: [], // 我的频道列表
       activeIndex: 0, // 当前激活的频道索引
-      showMoreAction: false// 显示more-action中的van-popup组件
+      showMoreAction: false, // 显示more-action中的van-popup组件
+      articleId: null, // 当前点击的文章ID
+      showChannelEdit: false // 控制 编辑频道 显示隐藏
     }
   },
   watch: {
@@ -118,9 +141,25 @@ export default {
     this.getMyChannels()
   },
   methods: {
+    // 打开编辑频道
+    openChannelEdit () {
+      this.showChannelEdit = true
+    },
+    // 删除对应的文章
+    removeArticle () {
+      // 当前激活频道的文章列表  移除对应的文章
+      // 从一个数组中 移除其中一项  需要对应索引
+      const articles = this.activeChannel.articles
+      const index = articles.findIndex(
+        item => item.art_id.toString() === this.articleId
+      )
+      articles.splice(index, 1)
+    },
     // 打开更多操作
-    openMoreAction () {
+    openMoreAction (id) {
       this.showMoreAction = true
+      // 记录当前点击的ID
+      this.articleId = id
     },
     // 记住滚动的位置
     remember (e) {
