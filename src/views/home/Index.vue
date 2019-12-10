@@ -24,7 +24,7 @@
               finished-text="没有更多了"
               @load="onLoad"
             >
-              <van-cell v-for="item in channel.articles" :key="item.art_id.toString()">
+              <van-cell :to="'/article/'+item.art_id.toString()" v-for="item in channel.articles" :key="item.art_id.toString()">
                 <div class="article_item">
                   <h3 class="van-ellipsis">{{item.title}}</h3>
                   <div class="img_box" v-if="item.cover.type===3">
@@ -40,7 +40,7 @@
                     <span>{{item.comm_count}}评论</span>
                     <span>{{item.pubdate|relTime}}</span>
                     <span
-                      @click="openMoreAction(item.art_id.toString())"
+                      @click.stop="openMoreAction(item.art_id.toString())"
                       v-if="user.token"
                       class="close"
                     >
